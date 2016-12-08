@@ -4,6 +4,7 @@ sys.path.append(os.getcwd())
 import sqlite3
 import string
 import random
+import sqlitebck
 from utils import *
 from create_test import TESTVALS
 
@@ -12,10 +13,11 @@ RETRIEVE = TESTVALS/10
 
 def run_test():
     #Boiler Plate
-    conn = sqlite3.connect('test.db')
-    conn.row_factory = dict_factory
-    c = conn.cursor()
-
+    disk_conn = sqlite3.connect('test.db')
+    mem_conn = sqlite3.connect(':memory:')
+    sqlitebck.copy(disk_conn, mem_conn)
+    mem_conn.row_factory = dict_factory
+    c = mem_conn.cursor()
     try:
         # Create temp table
         sql_temp_table = "CREATE TABLE temp_test(id INTEGER PRIMARY KEY);"
@@ -37,10 +39,9 @@ def run_test():
         print("QUERY SIZE: " + str(RETRIEVE))
         print("TABLE SIZE: " + str(TESTVALS))
     except:
-        print("oh noes")
-    cleanup(c, "temp_test")
-    conn.commit()
-    conn.close()
+        print("Oh noes")
+    mem_conn.close()
+    disk_conn.close()
 
 if __name__ == "__main__":
     run_test()
